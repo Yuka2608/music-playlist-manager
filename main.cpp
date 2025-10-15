@@ -51,10 +51,6 @@ main()
             else if (choice == 5)
             {
                 shouldQuitProgram = true;
-
-                cout << GREEN_COLOR << "Exiting program. Goodbye!" << WHITE_COLOR << endl;
-                sleep(1);
-                system("cls");
                 DisplayLoading();
                 DisplayProgramQuitBanner();
             }
