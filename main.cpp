@@ -46,6 +46,10 @@ void HandleMenuChoice(int choice, Playlist *&playlists);
 void HandleAddPlaylistFlow(Playlist *&playlists);
 void HandleAddSongFlow(Playlist *playlist);
 
+void DisplayAllPlaylist(Playlist *head);
+void HandleAfterDisplayPlaylist(Playlist *head);
+void DisplaySongs(Playlist *playlist);
+
 // core function prototypes
 void AddPlaylist(Playlist *&headOfPlaylists, string newPlaylistName);
 void AddSongToPlaylist(Playlist *playlist, string title, string artist, string genre);
@@ -350,7 +354,10 @@ void HandleMenuChoice(int choice, Playlist *&playlists)
     switch (choice)
     {
         case 0:
-            cout << "Display all playlists functionality not yet implemented." << endl;
+            system("cls");
+            DisplayLoading();
+            DisplayAllPlaylist(playlists);
+            HandleAfterDisplayPlaylist(playlists);
             break;
         case 1:
             HandleAddPlaylistFlow(playlists);
@@ -416,4 +423,192 @@ void HandleAddSongFlow(Playlist *playlist)
         }
         // If choice == 1, continue the loop to add another song
     }
+}
+
+void DisplayAllPlaylist(Playlist *head)
+{
+    cout << "\n========================= AVAILABLE PLAYLIST =========================\n";
+	
+    if (!head)
+    {
+        cout << RED_COLOR << "No playlist available.\n" << WHITE_COLOR;
+        cout << "======================================================================\n";
+        return;
+    }
+	
+    int index = 1;
+    Playlist *current = head;
+	
+    while (current)
+    {
+        cout << index << ". " << current->name << endl;
+        current = current->next; 
+        index++;
+    }
+	
+    cout << "======================================================================\n";
+}
+
+void HandleAfterDisplayPlaylist(Playlist *head)
+{
+	if(!head)
+	{
+		cout<<"\n Press Enter to return to the main menu...";
+		cin.ignore();
+		cin.get();
+		system("cls");
+		DisplayLoading();
+		return;
+	}
+	
+	cout<<endl;
+  	cout << endl;
+	cout << "=======================================================================" << endl;
+	cout << "||                                                                   ||" << endl;
+	cout << "||                Press 0 to go back to the main menu                ||" << endl;
+	cout << "||                Press 1 to display songs in playlist               ||" << endl;
+	cout << "||                                                                   ||" << endl;
+	  cout << "=======================================================================" << endl;
+  
+  	int choice = GetValidChoice(0, 1);
+  	if (choice == 0)
+  	{
+	  system("cls");
+	  DisplayLoading();
+	  return;
+	}
+	
+	if(choice == 1)
+	{
+		system("cls");
+		DisplayLoading();
+		
+		Playlist *current = head;
+		int index = 1;
+		
+		cout<<"\nPlaylist Option:\n";
+		int playlistCount=0;
+		while(current)
+		{
+			cout << index << ". " << current->name << endl;
+			current = current->next;
+			index++;
+			playlistCount++;
+		}
+		
+		int selectedNum;
+		do
+		{
+			cout << "\nEnter playlist number: ";
+			cin>>selectedNum;
+			
+			if(selectedNum < 1 || selectedNum > playlistCount)
+				cout << "Invalid number. Please try again.\n";
+		}while(selectedNum < 1 || selectedNum > playlistCount);
+		
+		current = head;
+		for(int i = 1; i < selectedNum; i++)
+			current = current->next;
+			
+		system("cls");
+		DisplaySongs(current);
+	}
+}	
+
+void DisplaySongs(Playlist *playlist)
+{
+	if(!playlist || !playlist->songHead)
+	{
+		cout << endl;
+    	cout << "======================================================================" << endl;
+    	cout << "       Now viewing playlist: " << playlist->name << endl;
+    	cout << "======================================================================" << endl;
+		cout << RED_COLOR << "This playlist has no songs yet.\n" << WHITE_COLOR;
+		cout << "\nPress Enter to return...";
+		cin.ignore();
+		cin.get();
+		DisplayLoading();
+		return;
+	}
+	
+	int choice;
+	do
+	{
+    cout << endl;
+    cout << "======================================================================" << endl;
+    cout << "       Now viewing playlist: " << playlist->name << endl;
+    cout << "======================================================================" << endl;
+    cout << "||                                                                  ||" << endl;
+    cout << "||                                                                  ||" << endl;
+    cout << "||  [1] Display songs (forward order)                               ||" << endl;
+    cout << "||  [2] Display songs (backward order)                              ||" << endl;
+    cout << "||  [3] Show first song only                                        ||" << endl;
+    cout << "||  [4] Show last song only                                         ||" << endl;
+    cout << "||  [0] Return to previous menu                                     ||" << endl;
+    cout << "||                                                                  ||" << endl;
+    cout << "======================================================================" << endl;
+    cout << "Enter your choice: ";
+    cin >> choice;
+    
+    system("cls");
+    DisplayLoading();
+    
+    Song *song = nullptr;
+    switch (choice)
+    {
+	    case 1:
+		    cout << "\nSongs in forward order:\n";
+		    song = playlist->songHead;
+		    while(song)
+		    {
+			    cout << "- " << song->title << " by " << song->artist <<endl;
+			    song = song->next;
+			}
+			break;
+				
+		case 2:
+			cout << "\nSongs in backward order:\n";
+			song = playlist->songHead;
+			while(song && song->next)
+				song = song->next;
+					 
+			while(song)
+			{
+				cout << "- " << song->title << " by " << song->artist <<endl;
+				song = song->prev;
+			}
+			break;
+				
+		case 3:
+			cout << "\nFirst song in the playlist: \n";
+			cout << "- " << playlist->songHead->title << " by " << playlist->songHead->artist << endl;
+			break;
+				
+		case 4:
+			cout << "\nLast song in the playlist: \n";
+			song = playlist->songHead;
+			while(song && song->next)
+				song = song->next;
+			cout << "- " << song->title << " by " << song->artist << endl;
+			break;
+				
+		case 0:
+			cout << "Returning...\n";
+			system("cls");
+			DisplayLoading();
+			break;
+				
+		default:
+			cout << "Invalid choice. Try again.\n";
+		}
+		
+		if (choice != 0)
+		{
+			cout << "\nPress Enter to continue...";
+			cin.ignore();
+			cin.get();
+			system("cls");
+		}
+		
+	}while (choice != 0);
 }
