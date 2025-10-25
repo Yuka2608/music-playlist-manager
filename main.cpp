@@ -33,7 +33,6 @@ void DisplayMainMenu();
 void DisplayLoading();
 void DisplayQuitBanner();
 void DisplayInvalidChoice();
-void DisplayEnterChoice(int min, int max);
 
 // Core Functions
 void AddPlaylist(Playlist *&head, string name);
@@ -153,11 +152,6 @@ void DisplayInvalidChoice()
     cout << RED_COLOR << "Invalid choice. Please try again." << WHITE_COLOR << endl;
 }
 
-void DisplayEnterChoice(int min, int max)
-{
-    cout << "Enter your choice (" << min << "-" << max << "): ";
-}
-
 // ==================== CORE FUNCTIONS ====================
 
 void AddPlaylist(Playlist *&head, string name)
@@ -207,8 +201,8 @@ void AddSongToPlaylist(Playlist *playlist, string title, string artist, string g
     newSong->title = title;
     newSong->artist = artist;
     newSong->genre = genre;
-    newSong->next = nullptr;
-    newSong->prev = nullptr;
+    newSong->next = NULL;
+    newSong->prev = NULL;
 
     if (!playlist->songHead)
     {
@@ -217,7 +211,7 @@ void AddSongToPlaylist(Playlist *playlist, string title, string artist, string g
     }
 
     Song *current = playlist->songHead;
-    Song *prev = nullptr;
+    Song *prev = NULL;
 
     while (current && current->title < title)
     {
@@ -246,7 +240,7 @@ int GetValidChoice(int min, int max)
     int choice;
     do
     {
-        DisplayEnterChoice(min, max);
+        cout << "Enter your choice (" << min << "-" << max << "): ";
         cin >> choice;
         
         if (choice < min || choice > max)
