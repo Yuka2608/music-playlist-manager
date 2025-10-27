@@ -529,42 +529,66 @@ void ShowPlaylistSongs(Playlist *playlist)
 
 void ShowSongsForward(Playlist *playlist)
 {
-    cout << endl << "Songs in forward order:" << endl;
+    cout << endl;
+    cout << "========================= SONGS (FORWARD ORDER) =========================" << endl;
+    
     Song *song = playlist->songHead;
+    int songNumber = 1;
     while(song)
     {
-        cout << "- " << song->title << " by " << song->artist << endl;
+        cout << songNumber << ". " << song->title << " by " << song->artist << " [" << song->genre << "]" << endl;
         song = song->next;
+        songNumber++;
     }
+    
+    cout << "=======================================================================" << endl;
+    cout << "Total songs: " << playlist->songCount << endl;
+    cout << "=======================================================================" << endl;
 }
 
 void ShowSongsBackward(Playlist *playlist)
 {
-    cout << endl << "Songs in backward order:" << endl;
+    cout << endl;
+    cout << "========================= SONGS (BACKWARD ORDER) ========================" << endl;
+    
     Song *song = playlist->songHead;
     while(song && song->next)
         song = song->next;
-         
+    
+    int songNumber = playlist->songCount;
     while(song)
     {
-        cout << "- " << song->title << " by " << song->artist << endl;
+        cout << songNumber << ". " << song->title << " by " << song->artist << " [" << song->genre << "]" << endl;
         song = song->prev;
+        songNumber--;
     }
+    
+    cout << "=======================================================================" << endl;
+    cout << "Total songs: " << playlist->songCount << endl;
+    cout << "=======================================================================" << endl;
 }
 
 void ShowFirstSong(Playlist *playlist)
 {
-    cout << endl << "First song in the playlist:" << endl;
-    cout << "- " << playlist->songHead->title << " by " << playlist->songHead->artist << endl;
+    cout << endl;
+    cout << "========================= FIRST SONG ==========================" << endl;
+    cout << "1. " << playlist->songHead->title << " by " << playlist->songHead->artist << " [" << playlist->songHead->genre << "]" << endl;
+    cout << "=======================================================================" << endl;
+    cout << "Total songs: " << playlist->songCount << endl;
+    cout << "=======================================================================" << endl;
 }
 
 void ShowLastSong(Playlist *playlist)
 {
-    cout << endl << "Last song in the playlist:" << endl;
+    cout << endl;
+    cout << "========================= LAST SONG ==========================" << endl;
     Song *song = playlist->songHead;
     while(song && song->next)
         song = song->next;
-    cout << "- " << song->title << " by " << song->artist << endl;
+    cout << playlist->songCount << ". " << song->title << " by " << song->artist << " [" << song->genre << "]" << endl;
+    cout << "=======================================================================" << endl;
+    cout << "Total songs: " << playlist->songCount << endl;
+    cout << "=======================================================================" << endl;
 }
 
 // ==================== INPUT FUNCTIONS ====================
