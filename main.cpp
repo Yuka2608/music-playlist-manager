@@ -23,6 +23,7 @@ struct Playlist
 {
     string name;
     Song *songHead;
+    int songCount;
     Playlist *next;
     Playlist *prev;
 };
@@ -61,7 +62,6 @@ void GetSongDetails(Playlist *playlist);
 Playlist* SelectPlaylist(Playlist *head);
 
 // Menu Display Functions
-void ShowMainMenu();
 void ShowPlaylistOptions();
 void ShowSongOptions();
 void ShowEmptyPlaylistOptions();
@@ -162,6 +162,7 @@ void AddPlaylist(Playlist *&head, string name)
     Playlist *newPlaylist = new Playlist;
     newPlaylist->name = name;
     newPlaylist->songHead = NULL;
+    newPlaylist->songCount = 0;
     newPlaylist->next = NULL;
     newPlaylist->prev = NULL;
 
@@ -210,6 +211,7 @@ void AddSongToPlaylist(Playlist *playlist, string title, string artist, string g
     if (!playlist->songHead)
     {
         playlist->songHead = newSong;
+        playlist->songCount++;
         return;
     }
 
@@ -236,6 +238,8 @@ void AddSongToPlaylist(Playlist *playlist, string title, string artist, string g
         if (current)
             current->prev = newSong;
     }
+    
+    playlist->songCount++;
 }
 
 int GetValidChoice(int min, int max)
@@ -453,19 +457,26 @@ void ShowAllPlaylists(Playlist *head)
         cout << RED_COLOR << "No playlist available." << WHITE_COLOR << endl;
         cout << endl << endl;
         cout << "=======================================================================" << endl;
+        cout << "Total playlists: 0" << endl;
+        cout << "=======================================================================" << endl;
+        cout << endl << endl;
         return;
     }
     
     int index = 1;
+    int totalPlaylists = 0;
     Playlist *current = head;
     
     while (current)
     {
-        cout << index << ". " << current->name << endl;
+        cout << index << ". " << current->name << " (" << current->songCount << " songs)" << endl;
         current = current->next;
         index++;
+        totalPlaylists++;
     }
     
+    cout << "=======================================================================" << endl;
+    cout << "Total playlists: " << totalPlaylists << endl;
     cout << "=======================================================================" << endl;
 }
 
@@ -475,14 +486,20 @@ void ShowPlaylistSelection(Playlist *head)
     int index = 1;
     int playlistCount = 0;
     
-    cout << "Playlist Options:" << endl;
+    cout << endl;
+    cout << "========================= SELECT PLAYLIST ==========================" << endl;
+    
     while(current)
     {
-        cout << index << ". " << current->name << endl;
+        cout << index << ". " << current->name << " (" << current->songCount << " songs)" << endl;
         current = current->next;
         index++;
         playlistCount++;
     }
+    
+    cout << "=======================================================================" << endl;
+    cout << "Total playlists: " << playlistCount << endl;
+    cout << "=======================================================================" << endl;
     
     int selectedNum;
     do
@@ -642,10 +659,6 @@ void GetSongDetails(Playlist *playlist)
 
 // ==================== MENU DISPLAY FUNCTIONS ====================
 
-void ShowMainMenu()
-{
-    DisplayMainMenu();
-}
 
 void ShowPlaylistOptions()
 {
@@ -724,7 +737,7 @@ void DuplicatePlaylist(Playlist *&head)
 		
 	Playlist *original = current;
 	
-	string newName = original->name + " (Copy)";
+	string newName = original->name + " Copy";
 	AddPlaylist(head, newName);
 	
 	Playlist *copy = head;
