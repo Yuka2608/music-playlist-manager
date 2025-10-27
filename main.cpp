@@ -28,12 +28,6 @@ struct Playlist
     Playlist *prev;
 };
 
-struct SearchResult
-{
-    Song *song;
-    SearchResult *next;
-};
-
 // Function Prototypes
 void DisplayWelcomeBanner();
 void DisplayMainMenu();
@@ -56,21 +50,11 @@ void HandlePlaylistMenu(Playlist *playlist);
 // Display Functions
 void ShowAllPlaylists(Playlist *head);
 void ShowPlaylistSelection(Playlist *head);
+void ShowPlaylistSongs(Playlist *playlist);
 void ShowSongsForward(Playlist *playlist);
 void ShowSongsBackward(Playlist *playlist);
 void ShowFirstSong(Playlist *playlist);
 void ShowLastSong(Playlist *playlist);
-
-// Search Functions
-void SearchByTitle(Playlist *playlist, string title);
-void SearchByArtist(Playlist *playlist, string artist);
-void SearchByGenre(Playlist *playlist, string genre);
-void DisplaySearchResults(SearchResult *results, string searchType, string searchTerm);
-void ShowSearchMenu();
-void HandleSearchMenu(Playlist *playlist);
-void AddToSearchResults(SearchResult *&head, Song *song);
-void ClearSearchResults(SearchResult *&head);
-int CountSearchResults(SearchResult *head);
 
 // Input Functions
 void GetPlaylistName(Playlist *&head);
@@ -86,12 +70,12 @@ void ShowEmptyPlaylistOptions();
 void DuplicatePlaylist(Playlist *&head);
 
 // Delete Functions
-void DeleteSongFromPlaylist(Playlist *playlist);
 void DeletePlaylist(Playlist *&head);
-void ShowDeleteSongMenu(Playlist *playlist);
+void DeleteSongFromPlaylist(Playlist *playlist);
 void ShowDeletePlaylistMenu(Playlist *&head);
-void HandleDeleteSong(Playlist *playlist);
+void ShowDeleteSongMenu(Playlist *playlist);
 void HandleDeletePlaylist(Playlist *&head);
+void HandleDeleteSong(Playlist *playlist);
 
 int main()
 {
@@ -449,12 +433,6 @@ void HandlePlaylistMenu(Playlist *playlist)
                 ShowLastSong(playlist);
                 break;
             case 5:
-                HandleSearchMenu(playlist);
-                // After returning from search, clear screen and show loading
-                system("cls");
-                DisplayLoading();
-                break;
-            case 6:
                 HandleDeleteSong(playlist);
                 break;
             case 0:
@@ -466,13 +444,12 @@ void HandlePlaylistMenu(Playlist *playlist)
                 cout << RED_COLOR << "Invalid choice. Try again." << WHITE_COLOR << endl;
         }
         
-        if (choice != 0 && choice != 5 && choice != 6)
+        if (choice != 0 && choice != 5)
         {
             cout << endl << "Press Enter to continue...";
             cin.ignore();
             cin.get();
             system("cls");
-            DisplayLoading();
         }
         
     } while (choice != 0);
@@ -556,6 +533,10 @@ void ShowPlaylistSelection(Playlist *head)
     HandlePlaylistMenu(current);
 }
 
+void ShowPlaylistSongs(Playlist *playlist)
+{
+    HandlePlaylistMenu(playlist);
+}
 
 void ShowSongsForward(Playlist *playlist)
 {
@@ -735,8 +716,7 @@ void ShowSongOptions()
     cout << "||  [2] Display songs (backward order)                              ||" << endl;
     cout << "||  [3] Show first song only                                        ||" << endl;
     cout << "||  [4] Show last song only                                         ||" << endl;
-    cout << "||  [5] Search songs                                                ||" << endl;
-    cout << "||  [6] Delete song                                                 ||" << endl;
+    cout << "||  [5] Delete song                                                 ||" << endl;
     cout << "||  [0] Return to previous menu                                     ||" << endl;
     cout << "||                                                                  ||" << endl;
     cout << "======================================================================" << endl;
@@ -753,302 +733,7 @@ void ShowEmptyPlaylistOptions()
     cout << "=======================================================================" << endl;
 }
 
-// ==================== SEARCH FUNCTIONS ====================
-
-void AddToSearchResults(SearchResult *&head, Song *song)
-{
-    SearchResult *newResult = new SearchResult;
-    newResult->song = song;
-    newResult->next = head;
-    head = newResult;
-}
-
-void ClearSearchResults(SearchResult *&head)
-{
-    while (head)
-    {
-        SearchResult *temp = head;
-        head = head->next;
-        delete temp;
-    }
-}
-
-int CountSearchResults(SearchResult *head)
-{
-    int count = 0;
-    SearchResult *current = head;
-    while (current)
-    {
-        count++;
-        current = current->next;
-    }
-    return count;
-}
-
-void SearchByTitle(Playlist *playlist, string title)
-{
-    SearchResult *results = NULL;
-    
-    if (!playlist || !playlist->songHead) 
-    {
-        DisplaySearchResults(results, "title", title);
-        return;
-    }
-    
-    Song *current = playlist->songHead;
-    while (current)
-    {
-        if (current->title == title)
-        {
-            AddToSearchResults(results, current);
-        }
-        current = current->next;
-    }
-    
-    DisplaySearchResults(results, "title", title);
-    ClearSearchResults(results);
-}
-
-void SearchByArtist(Playlist *playlist, string artist)
-{
-    SearchResult *results = NULL;
-    
-    if (!playlist || !playlist->songHead) 
-    {
-        DisplaySearchResults(results, "artist", artist);
-        return;
-    }
-    
-    Song *current = playlist->songHead;
-    while (current)
-    {
-        if (current->artist == artist)
-        {
-            AddToSearchResults(results, current);
-        }
-        current = current->next;
-    }
-    
-    DisplaySearchResults(results, "artist", artist);
-    ClearSearchResults(results);
-}
-
-void SearchByGenre(Playlist *playlist, string genre)
-{
-    SearchResult *results = NULL;
-    
-    if (!playlist || !playlist->songHead) 
-    {
-        DisplaySearchResults(results, "genre", genre);
-        return;
-    }
-    
-    Song *current = playlist->songHead;
-    while (current)
-    {
-        if (current->genre == genre)
-        {
-            AddToSearchResults(results, current);
-        }
-        current = current->next;
-    }
-    
-    DisplaySearchResults(results, "genre", genre);
-    ClearSearchResults(results);
-}
-
-void DisplaySearchResults(SearchResult *results, string searchType, string searchTerm)
-{
-    cout << endl;
-    cout << "========================= SEARCH RESULTS =========================" << endl;
-    
-    int count = CountSearchResults(results);
-    
-    if (count == 0)
-    {
-        cout << RED_COLOR << "No songs found with " << searchType << ": \"" << searchTerm << "\"" << WHITE_COLOR << endl;
-    }
-    else
-    {
-        cout << "Found " << count << " song(s) with " << searchType << ": \"" << searchTerm << "\"" << endl;
-        
-        SearchResult *current = results;
-        int index = 1;
-        while (current)
-        {
-            cout << index << ". " << current->song->title << " by " << current->song->artist << " [" << current->song->genre << "]" << endl;
-            current = current->next;
-            index++;
-        }
-    }
-    
-    cout << "=======================================================================" << endl;
-}
-
-void ShowSearchMenu()
-{
-    cout << endl;
-    cout << "======================================================================" << endl;
-    cout << "||                                                                  ||" << endl;
-    cout << "||                                                                  ||" << endl;
-    cout << "||  [1] Search by song title                                        ||" << endl;
-    cout << "||  [2] Search by artist name                                       ||" << endl;
-    cout << "||  [3] Search by genre                                             ||" << endl;
-    cout << "||  [0] Return to previous menu                                     ||" << endl;
-    cout << "||                                                                  ||" << endl;
-    cout << "======================================================================" << endl;
-}
-
-void HandleSearchMenu(Playlist *playlist)
-{
-    int choice;
-    do
-    {
-        ShowSearchMenu();
-        cout << "Enter your choice: ";
-        cin >> choice;
-        
-        system("cls");
-        DisplayLoading();
-        
-        if (choice >= 1 && choice <= 3)
-        {
-            string searchTerm;
-            cout << "Enter " << (choice == 1 ? "song title" : choice == 2 ? "artist name" : "genre") << ": ";
-            cin.ignore();
-            getline(cin, searchTerm);
-            
-            switch (choice)
-            {
-                case 1:
-                    SearchByTitle(playlist, searchTerm);
-                    break;
-                case 2:
-                    SearchByArtist(playlist, searchTerm);
-                    break;
-                case 3:
-                    SearchByGenre(playlist, searchTerm);
-                    break;
-            }
-            
-            cout << endl << "Press Enter to continue...";
-            cin.get();
-            system("cls");
-            DisplayLoading();
-        }
-        else if (choice != 0)
-        {
-            cout << RED_COLOR << "Invalid choice. Try again." << WHITE_COLOR << endl;
-        }
-        
-    } while (choice != 0);
-}
-
 // ==================== DELETE FUNCTIONS ====================
-
-void ShowDeleteSongMenu(Playlist *playlist)
-{
-    cout << endl;
-    cout << "========================= DELETE SONG =========================" << endl;
-    
-    if (!playlist || !playlist->songHead)
-    {
-        cout << RED_COLOR << "This playlist has no songs to delete." << WHITE_COLOR << endl;
-        cout << "=======================================================================" << endl;
-        return;
-    }
-    
-    Song *current = playlist->songHead;
-    int index = 1;
-    
-    cout << "Songs in playlist \"" << playlist->name << "\":" << endl;
-    while (current)
-    {
-        cout << index << ". " << current->title << " by " << current->artist << " [" << current->genre << "]" << endl;
-        current = current->next;
-        index++;
-    }
-    
-    cout << "=======================================================================" << endl;
-}
-
-void HandleDeleteSong(Playlist *playlist)
-{
-    if (!playlist || !playlist->songHead)
-    {
-        system("cls");
-        DisplayLoading();
-        cout << RED_COLOR << "This playlist has no songs to delete." << WHITE_COLOR << endl;
-        cout << endl << "Press Enter to continue...";
-        cin.ignore();
-        cin.get();
-        system("cls");
-        DisplayLoading();
-        return;
-    }
-    
-    system("cls");
-    DisplayLoading();
-    ShowDeleteSongMenu(playlist);
-    
-    if (!playlist->songHead) return; // Check again after display
-    
-    int songCount = playlist->songCount;
-    int choice;
-    
-    do
-    {
-        cout << "Enter song number to delete (1-" << songCount << ") or 0 to cancel: ";
-        cin >> choice;
-        
-        if (choice < 0 || choice > songCount)
-        {
-            cout << RED_COLOR << "Invalid choice. Please try again." << WHITE_COLOR << endl;
-        }
-    } while (choice < 0 || choice > songCount);
-    
-    if (choice == 0)
-    {
-        system("cls");
-        DisplayLoading();
-        return;
-    }
-    
-    // Find the song to delete
-    Song *current = playlist->songHead;
-    Song *prev = NULL;
-    
-    for (int i = 1; i < choice; i++)
-    {
-        prev = current;
-        current = current->next;
-    }
-    
-    // Delete the song
-    if (prev == NULL) // Deleting first song
-    {
-        playlist->songHead = current->next;
-        if (playlist->songHead)
-            playlist->songHead->prev = NULL;
-    }
-    else // Deleting middle or last song
-    {
-        prev->next = current->next;
-        if (current->next)
-            current->next->prev = prev;
-    }
-    
-    string deletedTitle = current->title;
-    delete current;
-    playlist->songCount--;
-    
-    cout << endl << GREEN_COLOR << "Song \"" << deletedTitle << "\" deleted successfully!" << WHITE_COLOR << endl;
-    cout << "Press Enter to continue...";
-    cin.ignore();
-    cin.get();
-    system("cls");
-    DisplayLoading();
-}
 
 void ShowDeletePlaylistMenu(Playlist *&head)
 {
@@ -1165,6 +850,110 @@ void HandleDeletePlaylist(Playlist *&head)
     delete current;
     
     cout << endl << GREEN_COLOR << "Playlist \"" << deletedName << "\" deleted successfully!" << WHITE_COLOR << endl;
+    cout << "Press Enter to continue...";
+    cin.ignore();
+    cin.get();
+    system("cls");
+    DisplayLoading();
+}
+
+void ShowDeleteSongMenu(Playlist *playlist)
+{
+    cout << endl;
+    cout << "========================= DELETE SONG =========================" << endl;
+    
+    if (!playlist || !playlist->songHead)
+    {
+        cout << RED_COLOR << "This playlist has no songs to delete." << WHITE_COLOR << endl;
+        cout << "=======================================================================" << endl;
+        return;
+    }
+    
+    Song *current = playlist->songHead;
+    int index = 1;
+    
+    cout << "Songs in playlist \"" << playlist->name << "\":" << endl;
+    while (current)
+    {
+        cout << index << ". " << current->title << " by " << current->artist << " [" << current->genre << "]" << endl;
+        current = current->next;
+        index++;
+    }
+    
+    cout << "=======================================================================" << endl;
+}
+
+void HandleDeleteSong(Playlist *playlist)
+{
+    if (!playlist || !playlist->songHead)
+    {
+        system("cls");
+        DisplayLoading();
+        cout << RED_COLOR << "This playlist has no songs to delete." << WHITE_COLOR << endl;
+        cout << endl << "Press Enter to continue...";
+        cin.ignore();
+        cin.get();
+        system("cls");
+        DisplayLoading();
+        return;
+    }
+    
+    system("cls");
+    DisplayLoading();
+    ShowDeleteSongMenu(playlist);
+    
+    if (!playlist->songHead) return; // Check again after display
+    
+    int songCount = playlist->songCount;
+    int choice;
+    
+    do
+    {
+        cout << "Enter song number to delete (1-" << songCount << ") or 0 to cancel: ";
+        cin >> choice;
+        
+        if (choice < 0 || choice > songCount)
+        {
+            cout << RED_COLOR << "Invalid choice. Please try again." << WHITE_COLOR << endl;
+        }
+    } while (choice < 0 || choice > songCount);
+    
+    if (choice == 0)
+    {
+        system("cls");
+        DisplayLoading();
+        return;
+    }
+    
+    // Find the song to delete
+    Song *current = playlist->songHead;
+    Song *prev = NULL;
+    
+    for (int i = 1; i < choice; i++)
+    {
+        prev = current;
+        current = current->next;
+    }
+    
+    // Delete the song
+    if (prev == NULL) // Deleting first song
+    {
+        playlist->songHead = current->next;
+        if (playlist->songHead)
+            playlist->songHead->prev = NULL;
+    }
+    else // Deleting middle or last song
+    {
+        prev->next = current->next;
+        if (current->next)
+            current->next->prev = prev;
+    }
+    
+    string deletedTitle = current->title;
+    delete current;
+    playlist->songCount--;
+    
+    cout << endl << GREEN_COLOR << "Song \"" << deletedTitle << "\" deleted successfully!" << WHITE_COLOR << endl;
     cout << "Press Enter to continue...";
     cin.ignore();
     cin.get();
