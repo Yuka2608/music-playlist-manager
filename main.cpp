@@ -66,6 +66,9 @@ void ShowPlaylistOptions();
 void ShowSongOptions();
 void ShowEmptyPlaylistOptions();
 
+// Duplicate Playlist
+void DuplicatePlaylist(Playlist *&head);
+
 int main()
 {
     Playlist *playlists = NULL;
@@ -268,7 +271,7 @@ void HandleMainMenu(Playlist *&playlists, int choice)
             HandleViewPlaylist(playlists);
             break;
         case 3:
-            cout << "Duplicate playlist functionality not yet implemented." << endl;
+            DuplicatePlaylist(playlists);
             break;
         case 4:
             cout << "Delete playlist functionality not yet implemented." << endl;
@@ -679,4 +682,66 @@ void ShowEmptyPlaylistOptions()
     cout << "||                Press 1 to add song to this playlist               ||" << endl;
     cout << "||                                                                   ||" << endl;
     cout << "=======================================================================" << endl;
+}
+
+// ==================== COPY PLAYLIST ====================
+void DuplicatePlaylist(Playlist *&head)
+{
+	if(!head)
+	{
+		system("cls");
+		DisplayLoading();
+		cout << RED_COLOR << "No playlist available to duplicate." << WHITE_COLOR << endl;
+		cout << "\nPress Enter to continue...";
+		cin.ignore();
+		cin.get();
+		system("cls");
+		DisplayLoading();
+		return;
+	}
+
+	system("cls");
+	DisplayLoading();
+		
+	cout << "\n==================== DUPLICATE PLAYLIST ====================" << endl;
+	Playlist *current = head;
+	int index = 1, total = 0;
+	
+	while(current)
+	{
+		cout << index << ". " << current->name << endl;
+		current = current->next;
+		index++;
+		total++;
+	}
+	
+	cout << "\nEnter the number of the playlist to duplicate:" << endl;
+	int choice = GetValidChoice(1, total);
+	
+	current = head;
+	for (int i=1; i<choice; i++)
+		current = current->next;
+		
+	Playlist *original = current;
+	
+	string newName = original->name + " (Copy)";
+	AddPlaylist(head, newName);
+	
+	Playlist *copy = head;
+	while(copy && copy->name != newName)
+		copy = copy->next;
+		
+	Song *songPtr = original->songHead;
+	while(songPtr)
+	{
+		AddSongToPlaylist(copy, songPtr->title, songPtr->artist, songPtr->genre);
+		songPtr = songPtr->next;
+	}
+	
+	cout << endl << GREEN_COLOR << "Playlist \"" << newName << "\" duplicated suffessfully!" << WHITE_COLOR << endl;
+  cout << "\nPress Enter to continue...";
+  cin.ignore();
+  cin.get();
+  system("cls");
+  DisplayLoading();	
 }
